@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abbas Electric Services - Bill</title>
+<style>
+  :root{ --yellow:#F7C11E; --black:#0b0d0a; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:#dfe5ec; font-family:'Segoe UI',Arial,sans-serif; padding:20px 0;}
+
+  .toolbar{width:210mm; margin:0 auto 10px; display:flex; gap:8px; flex-wrap:wrap;}
+  .toolbar button{background:var(--yellow); border:none; padding:10px 14px; font-weight:700; cursor:pointer; border-radius:4px; font-size:13px;}
+  .toolbar button.active{background:var(--black); color:var(--yellow); box-shadow:inset 0 0 0 2px var(--yellow);}
+  .toolbar button.blue{background:#1565c0; color:#fff;}
+  .toolbar button.green{background:#2e7d32; color:#fff;}
+  .toolbar select{padding:8px; font-size:13px; border:1px solid #999; border-radius:4px; max-width:220px;}
+
+  .page{width:210mm; min-height:297mm; margin:0 auto; background:#f7f8fa;
+        display:flex; flex-direction:column; position:relative;
+        box-shadow:0 2px 14px rgba(0,0,0,.3); overflow:hidden;}
+
+  header{background:var(--black); display:flex; align-items:center; padding:12px 22px;}
+  .logo{width:80px; height:auto; flex:none;}
+  .cname{margin-left:10px; color:var(--yellow); font-size:30px; font-weight:800; line-height:1.15;}
+  .cname span{color:#fff; font-size:20px; font-weight:700;}
+  .arrows{margin-left:auto; display:flex; gap:16px;}
+  .chev{width:60px; height:60px;
+        background:radial-gradient(circle,var(--yellow) 42%,transparent 46%);
+        background-size:9px 9px;
+        clip-path:polygon(0 0,35% 0,100% 50%,35% 100%,0 100%,62% 50%);}
+
+  .main{flex:1; position:relative; padding:24px 46px 14px; display:flex; flex-direction:column;}
+  .watermark{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+             opacity:.08; pointer-events:none;}
+  .watermark svg{width:320px; height:auto;}
+
+  .line-input{border:none; border-bottom:1.5px solid #222; background:transparent;
+              font-size:15px; padding:2px 4px; outline:none;}
+
+  .toprow{display:flex; justify-content:space-between; font-weight:700; font-size:15px;}
+  .toprow .line-input{width:170px; font-weight:400; margin-left:6px;}
+
+  .titleRow{text-align:center; margin:22px 0 18px;}
+  #billTitle{border:none; background:transparent; outline:none; text-align:center;
+             font-family:Georgia,serif; font-size:24px; font-weight:800;
+             text-decoration:underline; letter-spacing:1px; width:70%;}
+
+  .infoRow{margin-bottom:10px; font-size:14px; display:flex; gap:8px; align-items:flex-start;}
+  .infoRow b{min-width:70px;}
+  .infoRow textarea{flex:1; border:none; background:transparent; outline:none; resize:none;
+                    font-family:inherit; font-size:14px; line-height:1.5;}
+  .infoRow .line-input{flex:1;}
+
+  .tableWrap{position:relative; z-index:1;}
+  table{width:100%; border-collapse:collapse; background:#fff;}
+  th{background:var(--black); color:var(--yellow); padding:7px 5px; font-size:13px;}
+  td{border:1px solid #999; padding:6px; font-size:14px; text-align:center;}
+  td .line-input{width:100%; text-align:left; border-bottom:none;}
+  input.num{width:70px; border:none; background:transparent; text-align:center; outline:none; font-size:14px;}
+  .amt{font-weight:700;}
+  .totalLabel{font-weight:800; text-align:center; background:#fffbe6;}
+  #billTable.mode-area  .fxCol{display:none;}
+  #billTable.mode-fixed .arCol{display:none;}
+  .del button{border:none; background:#e33; color:#fff; border-radius:50%;
+              width:20px; height:20px; cursor:pointer; line-height:1;}
+
+  .recRow{display:flex; justify-content:flex-end; gap:24px; margin-top:10px; font-size:14px; font-weight:700;}
+  .recRow input{width:110px; border:1px solid #bbb; padding:2px 6px; text-align:right;}
+
+  .msg{margin-top:16px; font-size:14px; line-height:1.6;}
+  .msg select{margin-left:8px; font-size:12px; padding:3px; border:1px solid #ccc; background:#fff; cursor:pointer;}
+  .msg textarea{width:100%; margin-top:6px; border:none; background:transparent; outline:none;
+                resize:none; font-family:inherit; font-size:14px; line-height:1.6;}
+
+  .sigArea{display:flex; justify-content:space-between; align-items:flex-end;
+           margin-top:auto; padding-top:40px; position:relative; z-index:1;}
+  .sigLeft p{font-size:14px; line-height:1.5;}
+  .sigLeft .sigSpace{height:55px;}
+  .sigLeft .underline{width:190px; border-bottom:1.5px solid #222; margin-bottom:8px;}
+  .sigLeft input{border:none; background:transparent; outline:none; display:block;
+                 font-weight:800; font-size:15px; width:240px;}
+  .sigRight{font-weight:700; font-size:18px; font-family:Georgia,serif; display:flex; align-items:flex-end;}
+  .sigRight .line{width:160px; border-bottom:1.5px solid #222; margin-left:8px;}
+
+  footer{background:var(--black); color:var(--yellow); text-align:center; padding:8px 12px 12px;}
+  .addrRow input{border:none; border-bottom:1px dashed #6b5a10; background:transparent; color:var(--yellow);
+                 text-align:center; width:92%; outline:none; font-size:12px; padding:2px;}
+  .ftitle{font-weight:800; letter-spacing:2px; font-family:Georgia,serif; margin-top:4px;}
+  .frow{display:flex; justify-content:center; align-items:center; gap:8px; flex-wrap:wrap;
+        font-size:14px; margin-top:4px;}
+  .icon{width:26px; height:26px; background:var(--yellow); border-radius:50%;
+        display:inline-flex; align-items:center; justify-content:center;}
+  .icon svg{width:16px; fill:#000;}
+  .sep{font-size:18px;}
+
+  /* ===== MOBILE RESPONSIVE ===== */
+  @media screen and (max-width:820px){
+    body{padding:8px 0;}
+    .toolbar{width:100%; padding:0 8px;}
+    .page{width:100%; min-height:auto; box-shadow:none;}
+    header{padding:10px 12px;}
+    .logo{width:50px;}
+    .cname{font-size:19px;} .cname span{font-size:13px;}
+    .chev{width:30px; height:30px;}
+    .main{padding:14px 12px;}
+    .toprow{flex-direction:column; gap:8px;}
+    .toprow .line-input{width:60%;}
+    #billTitle{width:100%; font-size:19px;}
+    .infoRow{flex-direction:column; gap:2px;}
+    th,td{font-size:11px; padding:4px 2px;}
+    input.num{width:48px; font-size:12px;}
+    .tableWrap{overflow-x:auto;}
+    .recRow{flex-direction:column; align-items:flex-end; gap:6px;}
+    .sigArea{flex-direction:column; align-items:stretch; gap:30px;}
+    .sigRight{justify-content:flex-end;}
+    .frow{font-size:11px;}
+  }
+
+  @media print{
+    body{background:#fff; padding:0;}
+    .toolbar,.no-print{display:none !important;}
+    .page{box-shadow:none; margin:0; width:210mm; min-height:297mm;}
+    .tableWrap{overflow:visible;}
+    input::placeholder, textarea::placeholder{color:transparent;}
+  }
+  @page{size:A4; margin:0;}
+</style>
+</head>
+<body>
+
+<svg style="display:none">
+  <symbol id="logoSym" viewBox="0 0 100 130">
+    <path d="M 63.7 92.6 A 40 40 0 1 1 87.6 68.7" fill="none" stroke="#F7C11E" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 40 105 L 72 111 L 40 119 L 72 127" fill="none" stroke="#F7C11E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 55 20 L 30 60 H 46 L 40 90 L 70 48 H 53 Z" fill="#F7C11E"/>
+  </symbol>
+</svg>
+
+<div class="toolbar no-print">
+  <button onclick="addRow()">+ Row</button>
+  <button id="btnArea"  onclick="setMode('area')">📐 C/ Area Bill</button>
+  <button id="btnFixed" onclick="setMode('fixed')">💰 Fixed Bill</button>
+  <button class="green" onclick="window.print()">🖨 Print / PDF</button>
+  <button class="blue" onclick="saveBill()">💾 Save Bill</button>
+  <button class="blue" onclick="newBill()">🆕 New Bill</button>
+  <select id="billList" onchange="openBill(this.value)"><option value="">📂 Saved Bills…</option></select>
+  <button class="blue" onclick="backup()">⬇ Backup</button>
+  <button class="blue" onclick="document.getElementById('restoreFile').click()">⬆ Restore</button>
+  <input type="file" id="restoreFile" accept=".json" style="display:none" onchange="restore(this)">
+</div>
+
+<div class="page">
+  <header>
+    <svg class="logo"><use href="#logoSym"/></svg>
+    <div class="cname">ABBAS <span>ELECTRIC</span><br>SERVICES</div>
+    <div class="arrows"><div class="chev"></div><div class="chev"></div><div class="chev"></div></div>
+  </header>
+
+  <div class="main">
+    <div class="watermark"><svg><use href="#logoSym"/></svg></div>
+
+    <div class="toprow">
+      <span>KC No / Invoice No:<input class="line-input" id="kcNo" oninput="calc()"></span>
+      <span>Date:<input class="line-input" id="date" style="width:120px" oninput="calc()"></span>
+    </div>
+
+    <div class="titleRow"><input id="billTitle" value="BILL" oninput="calc()"></div>
+
+    <div class="infoRow"><b>Bill To:</b><textarea id="billTo" rows="3" oninput="calc()" placeholder="Customer / company name&#10;Builder / developer&#10;Area, City"></textarea></div>
+    <div class="infoRow"><b>Bill for:</b><input class="line-input" id="billFor" oninput="calc()" placeholder="Site office & model flat waghera"></div>
+    <div class="infoRow"><b>Subject:</b><input class="line-input" id="subject" oninput="calc()" placeholder="Bill ka subject likhein"></div>
+
+    <div class="tableWrap">
+    <table id="billTable" class="mode-area">
+      <thead>
+        <tr>
+          <th>S.no</th><th>Description</th>
+          <th class="arCol">C/ Area</th><th class="arCol">Rate</th>
+          <th class="fxCol">Total Amount</th>
+          <th>Qty (%)</th><th>Amount</th><th class="no-print"></th>
+        </tr>
+      </thead>
+      <tbody id="items">
+        <tr id="totalRow">
+          <td id="totalLabel" colspan="5" class="totalLabel">Total:</td>
+          <td class="amt" id="grandTotal">0/-</td>
+          <td class="no-print"></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="recRow">
+      <span>Received: <input id="received" type="number" value="0" oninput="calc()"></span>
+      <span>Balance: <span id="balance">Rs. 0</span></span>
+    </div>
+
+    <div class="msg">
+      <b>Message / Notes:</b>
+      <select id="noteSelect" class="no-print" onchange="addNote(this)">
+        <option value="">+ Common note select karein…</option>
+        <option>Payment is due within 7 days.</option>
+        <option>1 month warranty on wiring & repair work.</option>
+        <option>No warranty on burning / electrical items.</option>
+        <option>Goods once sold will not be taken back.</option>
+        <option>Only cash payment accepted.</option>
+        <option>Advance (bayana) required before starting work.</option>
+        <option>We request you to clear my invoice as soon as possible.</option>
+        <option>Thank you for choosing Abbas Electric Services!</option>
+      </select>
+      <textarea id="noteText" rows="3" oninput="calc()">Dear Sir this is the bill for the above mentioned work. So, we request you to clear my invoice as soon as possible.</textarea>
+    </div>
+
+    <div class="sigArea">
+      <div class="sigLeft">
+        <p>Thank you<br>Regards</p>
+        <div class="sigSpace"></div>
+        <div class="underline"></div>
+        <input id="name1" value="Abbas Ashraf" oninput="calc()">
+        <input id="name2" value="Abbas Electric Services" oninput="calc()">
+      </div>
+      <div class="sigRight">Sign: <span class="line"></span></div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="addrRow"><input id="addr" oninput="calc()" placeholder="Office # 1: address yahan likhein  |  Office # 2: address yahan likhein"></div>
+    <div class="ftitle">CONTACT US</div>
+    <div class="frow">
+      <span class="icon"><svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></span>
+      +923158334374 <span class="sep">|</span> +923163771468
+      <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></span>
+      ABBASASHRAF29@GMAIL.COM
+    </div>
+  </footer>
+</div>
+
+<script>
+  const el = id => document.getElementById(id);
+  const tbody = el('items');
+  let mode = 'area', currentId = null;
+
+  /* ---------- DATA SAVE / LOAD (localStorage) ---------- */
+  function getState(){
+    return {
+      id: currentId, mode,
+      kcNo: el('kcNo').value, date: el('date').value, title: el('billTitle').value,
+      billTo: el('billTo').value, billFor: el('billFor').value, subject: el('subject').value,
+      received: el('received').value, notes: el('noteText').value, addr: el('addr').value,
+      name1: el('name1').value, name2: el('name2').value,
+      rows: [...tbody.rows].filter(r=>r.id!=='totalRow').map(r=>({
+        desc: r.querySelector('.desc').value, area: r.querySelector('.area').value,
+        rate: r.querySelector('.rate').value, ftotal: r.querySelector('.ftotal').value,
+        pct: r.querySelector('.pct').value
+      }))
+    };
+  }
+  function autoSave(){ localStorage.setItem('aes_current', JSON.stringify(getState())); }
+  function getBills(){ try{ return JSON.parse(localStorage.getItem('aes_bills'))||[]; }catch(e){ return []; } }
+  function upsert(s){
+    const bills = getBills();
+    s.total = el('grandTotal').textContent;
+    s.label = ((s.billTo||'').split('\n')[0] || 'Bill') + ' — ' + s.total;
+    const i = bills.findIndex(b=>b.id===s.id);
+    if(i>=0) bills[i]=s; else bills.push(s);
+    localStorage.setItem('aes_bills', JSON.stringify(bills));
+    refreshList();
+  }
+  function refreshList(){
+    const sel = el('billList');
+    sel.innerHTML = '<option value="">📂 Saved Bills ('+getBills().length+')…</option>';
+    getBills().slice().reverse().forEach(b=>{
+      sel.innerHTML += `<option value="${b.id}">${b.label}</option>`;
+    });
+  }
+  function saveBill(){
+    const s = getState();
+    if(!s.id) s.id = Date.now();
+    currentId = s.id;
+    upsert(s); autoSave();
+    alert('✅ Bill history mein save ho gayi!');
+  }
+  function openBill(id){
+    if(!id) return;
+    const b = getBills().find(x=>x.id==id);
+    if(b){ setState(b); }
+    el('billList').value='';
+  }
+  function hasContent(s){
+    return s.kcNo || s.billTo || s.billFor || s.subject ||
+      s.rows.some(r=>r.desc || +r.area || +r.rate || +r.ftotal);
+  }
+  function newBill(){
+    const s = getState();
+    if(hasContent(s)){ if(!s.id) s.id = Date.now(); upsert(s); } // purani bill khud save
+    currentId = null;
+    setState(null);
+  }
+  function backup(){
+    const data = {current:getState(), bills:getBills()};
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+    a.download = 'abbas-bills-backup.json';
+    a.click();
+  }
+  function restore(inp){
+    const f = inp.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = ()=>{ try{
+        const d = JSON.parse(r.result);
+        if(d.bills) localStorage.setItem('aes_bills', JSON.stringify(d.bills));
+        setState(d.current||null);
+        refreshList();
+        alert('✅ Backup restore ho gaya!');
+      }catch(e){ alert('❌ Ghalat file!'); } };
+    r.readAsText(f); inp.value='';
+  }
+
+  /* ---------- BILL UI ---------- */
+  function setMode(m){
+    mode = m;
+    el('billTable').classList.toggle('mode-area',  m==='area');
+    el('billTable').classList.toggle('mode-fixed', m==='fixed');
+    el('totalLabel').colSpan = (m==='area') ? 5 : 4;
+    el('btnArea').classList.toggle('active',  m==='area');
+    el('btnFixed').classList.toggle('active', m==='fixed');
+    calc();
+  }
+  function rowHTML(d){ d=d||{}; return `<tr>
+    <td class="no"></td>
+    <td><input class="line-input desc" placeholder="Description of work" value="${d.desc||''}" oninput="calc()"></td>
+    <td class="arCol"><input class="num area"  type="number" min="0" value="${d.area||0}" oninput="calc()"></td>
+    <td class="arCol"><input class="num rate"  type="number" min="0" value="${d.rate||0}" oninput="calc()"></td>
+    <td class="fxCol"><input class="num ftotal" type="number" min="0" value="${d.ftotal||0}" oninput="calc()"></td>
+    <td><input class="num pct" type="number" min="0" max="100" value="${d.pct!=null?d.pct:100}" oninput="calc()"></td>
+    <td class="amt">0/-</td>
+    <td class="del no-print"><button onclick="this.closest('tr').remove();calc();">×</button></td>
+  </tr>`; }
+  function addRow(d){ el('totalRow').insertAdjacentHTML('beforebegin', rowHTML(d)); renumber(); }
+  function renumber(){
+    let n=1;
+    [...tbody.rows].forEach(r=>{ if(r.id!=='totalRow') r.querySelector('.no').textContent = String(n++).padStart(2,'0'); });
+  }
+  function calc(){
+    let grand=0;
+    [...tbody.rows].forEach(r=>{
+      if(r.id==='totalRow') return;
+      const area=+r.querySelector('.area').value||0, rate=+r.querySelector('.rate').value||0,
+            ft=+r.querySelector('.ftotal').value||0, pct=+r.querySelector('.pct').value||0;
+      const amt = (mode==='area') ? Math.round(area*rate*pct/100) : Math.round(ft*pct/100);
+      r.querySelector('.amt').textContent = amt.toLocaleString()+'/-';
+      grand += amt;
+    });
+    el('grandTotal').textContent = grand.toLocaleString()+'/-';
+    const rec = +el('received').value||0;
+    el('balance').textContent = 'Rs. '+(grand-rec).toLocaleString();
+    autoSave();   // <-- har change khud save
+  }
+  function addNote(sel){
+    if(!sel.value) return;
+    el('noteText').value += (el('noteText').value?'\n':'') + '• ' + sel.value;
+    sel.value=''; calc();
+  }
+  function setState(s){
+    currentId = (s&&s.id)||null;
+    el('kcNo').value=s?.kcNo||''; el('date').value=s?.date||today();
+    el('billTitle').value=s?.title||'BILL';
+    el('billTo').value=s?.billTo||''; el('billFor').value=s?.billFor||''; el('subject').value=s?.subject||'';
+    el('received').value=s?.received||0; el('noteText').value=s?.notes||'';
+    el('addr').value=s?.addr||''; el('name1').value=s?.name1||'Abbas Ashraf';
+    el('name2').value=s?.name2||'Abbas Electric Services';
+    [...tbody.rows].forEach(r=>{ if(r.id!=='totalRow') r.remove(); });
+    const rows = (s&&s.rows&&s.rows.length)?s.rows:[{},{},{}];
+    rows.forEach(rw=>addRow(rw));
+    setMode(s?.mode||'area');
+  }
+  function today(){
+    const d=new Date();
+    return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
+  }
+
+  /* ---------- START ---------- */
+  refreshList();
+  const saved = localStorage.getItem('aes_current');
+  setState(saved ? JSON.parse(saved) : null);
+</script>
+</body>
+</html>
